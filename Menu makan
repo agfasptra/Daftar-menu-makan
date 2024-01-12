@@ -1,0 +1,159 @@
+cetak_klm macro klm
+        mov ah,09
+        lea dx,klm
+        int 21h
+
+endm
+
+buffernya macro buf
+        mov ah,0Ah 
+        lea dx,buffer
+        int 21h
+
+        lea bx, buffer+2
+endm
+
+.model small
+.code
+org 100h
+
+POSISI macro baris,kolom
+    mov ah,02h
+    mov dh,baris
+    mov dl,kolom
+    mov bh,00h
+    int 10h
+endm
+
+cls proc near 
+mov ah,06h
+mov cx,0000h
+mov dh,24 
+mov dl,79 
+mov al,00
+mov bh,15 
+int 10h
+jmp P1
+POSISI 0,0
+cls endp
+
+
+Tdata:  POSISI 0,0
+        jmp cls               
+        kal0 db '             ****************************  $'
+        KAL1 DB 13,10,'                 << PILIH MENU >> $'
+        KAL2 DB 13,10,'             **************************** $'
+        KAL3 DB 13,10, ' $'
+        KAL4 DB 13,10, '1. PAKET NASI GORENG $'
+        KAL5 DB 13,10, '2. PAKET AYAM $'
+        KAL6 DB 13,10, '3. PAKET SOP $'
+
+        KAL8 DB 13,10, 'PILIHLAH APA YANG KAMU INGINKAN [1..3] : $'
+        KAL9 DB  ' $',13,10,
+
+        kata1 DB 13,10,'=========== PAKET NASI GORENG   Rp.15.000,- ===========',13,10,' $'
+        kata2 DB 13,10,'=========== PAKET AYAM  Rp.18.000,- ===========',13,10,' $'
+        kata3 DB 13,10,'=========== PAKET SOP Rp.20.000,- ===========',13,10,'$'
+       
+        KALa DB 13,10,' A.NASI GORENG SEAFOOD',13,10,' B.NASI KAMBING$'
+        KALb DB 13,10,' A.AYAM GORENG',13,10,' B.AYAM PENYET $'
+        KALc DB 13,10,' A.SOP IGA BAKAR' ,13,10,' B.SOP BUNTUT$'
+        KALd DB ' $',13,10,
+        kali DB 13,10,'Makanan Apa Yang Anda Pesan: $'
+
+        kalsalah db 13,10,'MAAF PLIHAN YANG ANDA PILIH TIDAK ADA',13,18,'$'
+        kembali  DB 13,10,'tekan B/b untuk memesan kembali, atau tekan sembarang key untuk keluar :$'
+
+        Kale DB 13,10,' *************************** $'
+        KALf DB 13,10,'*     SILAKAN MENUNGGU      * $'
+        KALg DB 13,10,'*  MAKANAN SIAP KAMI ANTAR  * $' 
+        Kalh DB 13,10,' *************************** $'
+
+        buffer db 36,?,36 dup<?>
+
+Clear:
+        call cls
+P1:
+        cetak_klm kal0
+        cetak_klm kal1
+        cetak_klm kal2
+        cetak_klm kal3
+        cetak_klm kal4
+        cetak_klm kal5
+        cetak_klm kal6
+        cetak_klm kal8
+        cetak_klm kal9
+
+        buffernya
+        jmp pilihan
+
+Pilihan:
+        cmp byte ptr [bx],'1'
+        je paket1
+        cmp byte ptr [bx],'2'
+        je paket2
+        cmp byte ptr [bx],'3'
+        je paket3
+        jmp salah
+
+paket1:
+        cetak_klm kata1
+        cetak_klm KALa
+        cetak_klm KALd
+        cetak_klm kali 
+        buffernya
+        jmp makanan
+
+paket2:
+        cetak_klm kata2
+        cetak_klm KALb
+        cetak_klm KALd
+        cetak_klm kali
+        buffernya 
+        jmp makanan
+
+paket3:
+        cetak_klm kata3
+        cetak_klm KALc
+        cetak_klm KALd
+        cetak_klm kali
+        buffernya
+        jmp makanan
+
+makanan:
+        cmp byte ptr [bx],'A'
+        je makasih
+        cmp byte ptr [bx],'B' 
+        je makasih
+        jmp salah
+
+makasih:
+        cetak_klm KALe 
+        cetak_klm KALF
+        cetak_klm KALg
+        cetak_klm KALh
+
+        buffernya
+        jmp cetakback
+
+
+salah:
+        cetak_klm kalsalah
+        jmp cetakback
+cetakback:
+        cetak_klm kembali
+
+        jmp coice
+coice:
+        mov ah,01
+        int 21h
+        mov bh, al
+
+        cmp bh,'B'
+        je TData
+        cmp bh,'b'
+        je TData
+
+        JMP exit
+exit:   int 20h
+end Tdata
